@@ -51,8 +51,8 @@ for i, (x, y) in enumerate(cords):
     legs.append(
         to_Conv(
             f"argmax_{i}",
-            "",
-            "",
+            "",  # type: ignore
+            "",  # type: ignore
             offset=f"({z}, {x}, {y})",
             height=1,
             depth=1,
@@ -70,12 +70,12 @@ plot = [
     *legs,
 ]
 
-z += 2
+z += 2  # type: ignore
 plot.append(
     to_Conv(
         f"footstep_options",
         4,
-        "",
+        "",  # type: ignore
         offset=f"({z}, 0, 0)",
         height=1,
         depth=4,
@@ -91,7 +91,7 @@ plot.append(
     to_Conv(
         "state_input",
         43,
-        "",
+        "",  # type: ignore
         offset=f"({z},{-offset*3},0)",
         height=1,
         depth=43,
@@ -105,7 +105,7 @@ plot.append(
     to_Conv(
         "dense1",
         64,
-        "",
+        "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
         height=1,
         depth=64,
@@ -122,7 +122,7 @@ plot.append(
     to_Conv(
         "dense2",
         64,
-        "",
+        "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
         height=1,
         depth=64,
@@ -137,7 +137,7 @@ plot.append(
     to_Conv(
         "dense3",
         64,
-        "",
+        "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
         height=1,
         depth=64,
@@ -152,7 +152,7 @@ plot.append(
     to_Conv(
         "output",
         16,
-        "",
+        "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
         height=1,
         depth=16,

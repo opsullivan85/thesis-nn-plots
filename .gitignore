@@ -1,2 +1,6 @@
 **/target
 plot_files/*.tex
+plot_files/*.aux
+plot_files/*.log
+plot_files/*.fls
+plot_files/*.fdb_latexmk
