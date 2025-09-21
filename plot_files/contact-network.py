@@ -10,58 +10,108 @@ plot = [
     to_begin(),
 ]
 
+linear_scale = 0.5
+
 z = 0
 plot.append(
     to_Conv(
-        "state_input",
-        43,
-        "",  # type: ignore
+        "input",
+        18,
+        "",
         offset=f"({z},0,0)",
         height=1,
-        depth=43,
+        depth=18*linear_scale,
         width=1,
-        caption="State\\\\Input",
+        caption="Input",
     ),
 )
 
-prev_layer = "state_input"
-denses = [64, 64, 64]
-for i, size in enumerate(denses):
-    z += 2
-    plot.append(
-        to_Conv(
-            f"state_dense{i+1}",
-            size,
-            "",  # type: ignore
-            offset=f"({z},0,0)",
-            height=1,
-            depth=size,
-            width=1,
-            caption="Dense",
-        )
-    )
-    plot.append(to_connection(prev_layer, f"state_dense{i+1}"))
-    prev_layer = f"state_dense{i+1}"
+prev_layer = "input"
 
 z += 2
 plot.append(
     to_Conv(
-        f"output",
+        "linear1",
+        64,
+        "",
+        offset=f"({z},0,0)",
+        height=1,
+        depth=64*linear_scale,
+        width=1,
+        caption="Linear",
+    )
+)
+plot.append(to_connection(prev_layer, "linear1"))
+prev_layer = "linear1"
+
+z += 2
+plot.append(
+    to_Conv(
+        "linear2",
+        64,
+        "",
+        offset=f"({z},0,0)",
+        height=1,
+        depth=64*linear_scale,
+        width=1,
+        caption="Linear",
+    )
+)
+plot.append(to_connection(prev_layer, "linear2"))
+prev_layer = "linear2"
+
+z += 2
+plot.append(
+    to_Conv(
+        "conv",
+        8,
+        2,
+        offset=f"({z},0,0)",
+        height=8,
+        depth=8,
+        width=1,
+        caption="Conv2d",
+    )
+)
+plot.append(to_connection(prev_layer, "conv"))
+prev_layer = "conv"
+
+# z += 3.5
+# plot.append(
+#     to_Conv(
+#         "linear3",
+#         128,
+#         "",
+#         offset=f"({z},0,0)",
+#         height=1,
+#         depth=128*linear_scale,
+#         width=1,
+#         caption="Linear",
+#     )
+# )
+# plot.append(to_connection(prev_layer, "linear3"))
+# prev_layer = "linear3"
+
+z += 2
+plot.append(
+    to_Conv(
+        "output",
         5,
         5,
         offset=f"({z},0,0)",
         height=5,
         depth=5,
         width=1,
-        caption="Output",
+        caption="Footstep\\\\Preferences",
     )
 )
-plot.append(to_connection(prev_layer, f"output"))
+plot.append(to_connection(prev_layer, "output"))
+prev_layer = "output"
 
 z += 2
 plot.append(
     to_Conv(
-        f"placeholder",
+        "temp",
         5,
         5,
         offset=f"({z},0,0)",
@@ -71,7 +121,10 @@ plot.append(
         caption="",
     )
 )
-plot.append(to_connection("output", f"placeholder"))
+plot.append(to_connection(prev_layer, "temp"))
+prev_layer = "temp"
+
+
 
 plot.append(to_end())
 
