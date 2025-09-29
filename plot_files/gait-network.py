@@ -11,11 +11,20 @@ cords = [
     (-offset, -offset),
 ]
 
+images_path = __file__.replace("gait-network.py", "images")
+input_file_paths = [
+    f"{images_path}/RL.png",
+    f"{images_path}/FL.png",
+    f"{images_path}/FR.png",
+    f"{images_path}/RR.png",
+]
+
 legs = []
-for i, (x, y) in enumerate(cords):
+for i, ((x, y), input_file) in enumerate(zip(cords, input_file_paths)):
 
     z = 0
-    label = r"Footstep\\Preferences" if i == 0 else ""
+    label = r"Footstep Cost Map" if i == 0 else ""
+    curr_layer = f"input_{i}"
     legs.append(
         to_Conv(
             f"input_{i}",
@@ -28,12 +37,22 @@ for i, (x, y) in enumerate(cords):
             caption=label,
         )
     )
+    legs.append(
+        to_input(
+            input_file,
+            to=f"({z+0.2}, {x}, {y-1.02})",
+            width=-1,
+            height=1,
+        )
+    )
+    prev_layer = curr_layer
 
     z += 2.5
     label = r"Position\\Filters" if i == 0 else ""
+    curr_layer = f"filter_{i}"
     legs.append(
         to_Conv(
-            f"filter_{i}",
+            curr_layer,
             5,
             5,
             offset=f"({z}, {x}, {y})",
@@ -43,14 +62,24 @@ for i, (x, y) in enumerate(cords):
             caption=label,
         )
     )
+    legs.append(
+        to_input(
+            input_file[:-4]+"_mask.png",
+            to=f"({z+0.2}, {x}, {y-1.02})",
+            width=-1,
+            height=1,
+        )
+    )
 
-    legs.append(to_connection(f"input_{i}", f"filter_{i}"))
+    legs.append(to_connection(prev_layer, curr_layer))
+    prev_layer = curr_layer
 
     z += 2
-    label = r"Flatten\\Argmax" if i == 0 else ""
+    label = r"Argmin" if i == 0 else ""
+    curr_layer = f"argmax_{i}"
     legs.append(
         to_Conv(
-            f"argmax_{i}",
+            curr_layer,
             "",  # type: ignore
             "",  # type: ignore
             offset=f"({z}, {x}, {y})",
@@ -61,7 +90,8 @@ for i, (x, y) in enumerate(cords):
         )
     )
 
-    legs.append(to_connection(f"filter_{i}", f"argmax_{i}"))
+    legs.append(to_connection(prev_layer, curr_layer))
+    prev_layer = curr_layer
 
 plot = [
     to_head(".."),
@@ -71,39 +101,43 @@ plot = [
 ]
 
 z += 2  # type: ignore
+curr_layer = "footstep_options"
 plot.append(
     to_Conv(
-        f"footstep_options",
-        4,
+        curr_layer,
+        16,
         "",  # type: ignore
         offset=f"({z}, 0, 0)",
         height=1,
-        depth=4,
+        depth=8,
         width=1,
         caption="Footstep\\\\Options",
     )
 )
 
-plot.extend([to_connection(f"argmax_{i}", f"footstep_options") for i in range(4)])
+plot.extend([to_connection(f"argmax_{i}", curr_layer) for i in range(4)])
+prev_layer = curr_layer
 
 low_level = -offset * 3
+curr_layer = "state_input"
 plot.append(
     to_Conv(
-        "state_input",
-        43,
+        curr_layer,
+        22,
         "",  # type: ignore
         offset=f"({z},{-offset*3},0)",
         height=1,
-        depth=43,
+        depth=22,
         width=1,
         caption="State\\\\Input",
     ),
 )
 
+curr_layer = "dense1"
 z += 3
 plot.append(
     to_Conv(
-        "dense1",
+        curr_layer,
         64,
         "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
@@ -114,13 +148,15 @@ plot.append(
     ),
 )
 
-plot.append(to_connection("state_input", "dense1"))
-plot.append(to_connection("footstep_options", "dense1"))
+plot.append(to_connection("state_input", curr_layer))
+plot.append(to_connection("footstep_options", curr_layer))
+prev_layer = curr_layer
 
 z += 1.5
+curr_layer = "dense2"
 plot.append(
     to_Conv(
-        "dense2",
+        curr_layer,
         64,
         "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
@@ -130,12 +166,14 @@ plot.append(
         caption="Dense",
     ),
 )
-plot.append(to_connection("dense1", "dense2"))
+plot.append(to_connection(prev_layer, curr_layer))
+prev_layer = curr_layer
 
 z += 1.5
+curr_layer = "dense3"
 plot.append(
     to_Conv(
-        "dense3",
+        curr_layer,
         64,
         "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
@@ -145,12 +183,14 @@ plot.append(
         caption="Dense",
     ),
 )
-plot.append(to_connection("dense2", "dense3"))
+plot.append(to_connection(prev_layer, curr_layer))
+prev_layer = curr_layer
 
 z += 1.5
+curr_layer = "output"
 plot.append(
     to_Conv(
-        "output",
+        curr_layer,
         16,
         "",  # type: ignore
         offset=f"({z},{low_level/2},0)",
@@ -160,7 +200,8 @@ plot.append(
         caption="Output",
     ),
 )
-plot.append(to_connection("dense3", "output"))
+plot.append(to_connection(prev_layer, curr_layer))
+prev_layer = curr_layer
 
 plot.append(to_end())
 
