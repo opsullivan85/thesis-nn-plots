@@ -102,27 +102,60 @@ plot.append(
         height=5,
         depth=5,
         width=1,
-        caption="Footstep\\\\Preferences",
+        caption=r"Footstep\\Cost Map",
+    )
+)
+images_path = __file__.replace("contact-network.py", "images")
+plot.append(
+    to_input(
+        f"{images_path}/RR.png",
+        to=f"({z+0.2}, {0}, {0-1.02})",
+        width=-1,
+        height=1,
     )
 )
 plot.append(to_connection(prev_layer, "output"))
 prev_layer = "output"
 
-z += 2
+####################################################################################################
+# dummy
+####################################################################################################
+
+z += 3
+curr_layer = "dummy1"
 plot.append(
     to_Conv(
-        "temp",
-        5,
-        5,
+        curr_layer,
+        "",  # type: ignore
+        "",  # type: ignore
         offset=f"({z},0,0)",
-        height=5,
-        depth=5,
+        height=1,
+        depth=1,
         width=1,
         caption="",
-    )
+    ),
 )
-plot.append(to_connection(prev_layer, "temp"))
-prev_layer = "temp"
+prev_layer = curr_layer
+z += 1
+curr_layer = "dummy2"
+plot.append(
+    to_Conv(
+        curr_layer,
+        "",  # type: ignore
+        "",  # type: ignore
+        offset=f"({z},0,0)",
+        height=1,
+        depth=1,
+        width=1,
+        caption="",
+    ),
+)
+plot.append(to_connection(prev_layer, curr_layer))
+
+####################################################################################################
+# rest
+####################################################################################################
+
 
 
 
